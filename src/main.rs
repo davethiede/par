@@ -7,18 +7,27 @@ use std::{thread, time};
 struct Job<'a> {
     filename: &'a str,
     created: chrono::DateTime<chrono::Utc>,
+    duration: f32,
+    thread_id: thread::ThreadId,
 }
 impl<'a> Job<'a> {
     fn new(name: &'a str) -> Self {
         Self {
             filename: name,
             created: chrono::Utc::now(),
+            duration: 0.0,
+            thread_id: thread::current().id(),
         }
     }
-    fn run(self) {
+    fn run(&mut self) {
+        let start = time::Instant::now();
         let r = rand::random::<u8>();
         let delay = time::Duration::from_millis(r as u64);
         thread::sleep(delay);
+        let duration = start.elapsed();
+        self.duration = duration.as_secs_f32();
+        self.thread_id = thread::current().id();
+        println!("{}", self.duration);
     }
 }
 
@@ -30,6 +39,8 @@ fn main() {
     jobs.push(Job::new("three"));
     jobs.insert(0, Job::new("four"));
 
-    let jobiter = jobs.par_iter().map(|&x|x.run());
-    dbg!(&jobiter);
+    let jobiter = jobs.par_iter_mut().map(|x: &mut Job| x.run());
+    let mut results = vec![];
+    jobiter.collect_into_vec(&mut results);
+    dbg!(&results);
 }
