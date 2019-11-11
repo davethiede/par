@@ -38,9 +38,15 @@ fn main() {
     jobs.push(Job::new("two"));
     jobs.push(Job::new("three"));
     jobs.insert(0, Job::new("four"));
+    jobs.push(Job::new("five"));
+    jobs.push(Job::new("six"));
+    jobs.push(Job::new("seven"));
+    jobs.push(Job::new("eight"));
+    jobs.push(Job::new("nine"));
 
     let jobiter = jobs.par_iter_mut().map(|x: &mut Job| x.run());
     let mut results = vec![];
     jobiter.collect_into_vec(&mut results);
     dbg!(&results);
+    dbg!(&jobs);
 }
